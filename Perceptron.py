@@ -21,6 +21,14 @@ print('Labels counts in y:', np.bincount(y))
 print('Labels counts in y_train:', np.bincount(y_train))
 print('Labels counts in y_test:', np.bincount(y_test))
 
+# Standardizing the features.
+# Remember the aim here is to achieve faster convergence,
+# and have prevent our algorithm from being affected by the feature with the highest scale
+# For instance, x1 values could range between [0,1] while x2 values range between [100,1000]
+# And because of this difference, x2 would dominate and overshoot during the optimization.
+# But when we standardize, we make sure to transform each feature is centered at 0,
+# and each feature has a standard deviation at 1.
+# This way we prevent overshooting, and give each feature equal importance, by shrinking all the data
 sc = StandardScaler()
 sc.fit(X_train)
 #print(X_train) # row 1: [1.4 0.2]
