@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
 import numpy as np
 import Perceptron as ppn
 import math
@@ -86,11 +87,12 @@ class LogisticRegressionGD:
             net_input = self.net_input(X)
             output = self.activation(net_input)
             errors = (y - output)
-            self.w_ += self.eta * 2.0 * X.T.dot(errors) / X.shape[0]
+            self.w_ += self.eta * 2.0 * X.T.dot(errors) / X.shape[0] # per definition
             self.b_ += self.eta * 2.0 * errors.mean()
             loss = (-y.dot(np.log(output)) - ((1 - y).dot(np.log(1 - output))) / X.shape[0])
             self.losses_.append(loss)
         return self
+
 
     def net_input(self, X):
         """Calculate net input"""
@@ -105,6 +107,8 @@ class LogisticRegressionGD:
         return np.where(self.activation(self.net_input(X)) >= 0.5, 1, 0)
 
 
+# NOTE we will only consider setosa and versicolor flowers (class 0 and 1) to train our data.
+# Since our logistic regression model only works for binary classification tasks when we fit it.
 X_train_01_subset = ppn.X_train_std[(ppn.y_train == 0) | (ppn.y_train == 1)]
 y_train_01_subset = ppn.y_train[(ppn.y_train == 0) | (ppn.y_train == 1)]
 lrgd = LogisticRegressionGD(eta=0.3,
@@ -120,3 +124,22 @@ plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
 
+lr = LogisticRegression(C=100.0, solver='lbfgs', multi_class='ovr')
+lr.fit(ppn.X_train_std, ppn.y_train)
+ppn.plot_decision_regions(ppn.X_combined_std,
+                          ppn.y_combined,
+                          classifier=lr,
+                          test_idx=range(105, 150))
+plt.xlabel('Petal width [standardized]')
+plt.ylabel('Petal length [standardized]')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+print(lr.predict_proba(ppn.X_test_std[:3, :]))
+print(lr.predict_proba(ppn.X_test_std[:3, :]).sum(axis=1))
+print(lr.predict_proba(ppn.X_test_std[:3, :]).argmax(axis=1))
+print(lr.predict(ppn.X_test_std[:3, :])) # the more convenient way to obtain class labels
+
+# predict class label of a single flower example
+print(lr.predict((ppn.X_test_std[0, :].reshape(1, -1)))) #scikit-learn expect two-dimensional arrays as input. So a single row has to be sliced and converted into a two-dimensional array.
