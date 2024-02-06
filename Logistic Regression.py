@@ -124,7 +124,7 @@ plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
 
-lr = LogisticRegression(C=100.0, solver='lbfgs', multi_class='ovr')
+lr = LogisticRegression(C=100.0, solver='lbfgs', multi_class='ovr') # solver='liblinear' is a highly optimized C/C++ as alternative solver
 lr.fit(ppn.X_train_std, ppn.y_train)
 ppn.plot_decision_regions(ppn.X_combined_std,
                           ppn.y_combined,
@@ -143,3 +143,24 @@ print(lr.predict(ppn.X_test_std[:3, :])) # the more convenient way to obtain cla
 
 # predict class label of a single flower example
 print(lr.predict((ppn.X_test_std[0, :].reshape(1, -1)))) #scikit-learn expect two-dimensional arrays as input. So a single row has to be sliced and converted into a two-dimensional array.
+
+weights, params = [], []
+for c in np.arange(-5, 5):
+    lr = LogisticRegression(C=10.**c,
+                            multi_class='ovr')
+    lr.fit(ppn.X_train_std, ppn.y_train)
+    weights.append(lr.coef_[1])
+    params.append(10.**c)
+weights = np.array(weights)
+plt.plot(params, weights[:, 0],
+         label='Petal length')
+plt.plot(params, weights[:, 1],
+         linestyle='--',
+         label='Petal width')
+plt.ylabel('Weight coefficient')
+plt.xlabel('C')
+plt.legend(loc='upper left')
+plt.xscale('log')
+plt.show()
+
+
